@@ -6,16 +6,15 @@
 // functions, never at import time, so common.js can import this module and
 // still load under node for its pure helpers.
 
-// Still the old name: the extension was called Site Marker when this database
-// was created, and an IndexedDB name is the address of the data. Renaming it
-// would open a new, empty database and strand every mark in the old one, which
-// is a lot of damage for a string nobody sees. New profiles inherit it too, so
-// there is one name rather than two.
-const DB_NAME = 'site-marker'
-// Version 1 of this database belonged to the removed folder-sync feature (a
-// directory-handle store). Opening at 2 upgrades any leftover copy: the
-// upgrade handler clears whatever stores it finds before creating ours.
-const DB_VERSION = 2
+// A database name is the address of the data: renaming one doesn't move
+// anything, it opens a different, empty database. This was `site-marker` under
+// the extension's old name and was renamed while no profile held marks worth
+// keeping — export first if that ever stops being true.
+const DB_NAME = 'web-marker'
+// Version 1 because this name has no history. The old `site-marker` database
+// opened at 2 to clear the stores left by the removed folder-sync feature,
+// which used that name too; nothing has ever written under this one.
+const DB_VERSION = 1
 const STORE = 'entries'
 
 /**
@@ -38,8 +37,6 @@ function openDb() {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
     request.onupgradeneeded = () => {
       const db = request.result
-      // Anything already in this database is the folder-sync leftover.
-      for (const name of [...db.objectStoreNames]) db.deleteObjectStore(name)
       const entries = db.createObjectStore(STORE)
       entries.createIndex('domain', 'domain')
       entries.createIndex('host', 'host')

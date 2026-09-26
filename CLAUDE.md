@@ -66,7 +66,7 @@ combinations, and generating them keeps the colours defined once.
 
 Split by what watches it:
 
-- **Entries → IndexedDB.** Database `site-marker`, store `entries`, keyed by `urlKey()`,
+- **Entries → IndexedDB.** Database `web-marker`, store `entries`, keyed by `urlKey()`,
   indexed on `domain`, `host`, `addedAt`. One record per page, so a mark writes one record
   instead of rewriting the store. Plumbing lives only in [`db.js`](src/db.js); everything
   else goes through the store functions in [`common.js`](src/common.js).
@@ -96,11 +96,13 @@ approximate, the only size IndexedDB admits to). The popup reads only the curren
 through the `domain`/`host` index (`getSiteEntries()`), so growth doesn't slow it down; only
 the manage page loads everything, which is its job.
 
-**The database is still called `site-marker`**, from when the extension was. An IndexedDB
-name is the address of the data: renaming it opens a new, empty database and strands every
-mark in the old one, so it stays. Same story twice over — the removed folder-sync feature
-used a `site-marker` database too, so `db.js` deletes whatever stores it finds when upgrading
-to its own schema (v2). The old `chrome.storage.local` → IndexedDB migration is gone; a
+**A database name is the address of the data.** Renaming one moves nothing — it opens a
+different, empty database and leaves the old marks unreachable on disk. This one was
+`site-marker` under the extension's old name and was renamed while no profile held marks
+worth keeping; doing it later means exporting first, then importing after the reload. It
+opens at version 1 because the name has no history: the old `site-marker` database needed
+version 2 to clear the stores left behind by the removed folder-sync feature, which had
+used that name too. The old `chrome.storage.local` → IndexedDB migration is gone as well; a
 profile that never ran a build with it just starts empty.
 
 ## The on-page marker
