@@ -38,8 +38,7 @@ const STATUSES = {
   },
 }
 const MARKED = Object.values(STATUSES)
-const SEEN_ATTR = 'data-wmk'
-const DEBOUNCE_MS = 300
+const SCAN_DELAY_MS = 300
 const CHUNK = 400
 
 let enabled = false
@@ -48,6 +47,19 @@ let annotateKey = null
 let observer = null
 let timer = null
 let orphaned = false // the extension was reloaded out from under this script
+/**
+ * The href each link was last looked up as. A single-page app routes by handing
+ * an anchor already on screen a new href rather than building a new link, so
+ * "already looked at" has to mean "looked at pointing there" — otherwise a
+ * recycled link keeps the mark of the page it used to point to for as long as
+ * the tab is open.
+ *
+ * A WeakMap rather than an attribute on the link: the page carries nothing of
+ * ours, and a link the framework drops takes its entry with it.
+ */
+let checked = new WeakMap()
+/** The URL the marks on screen were resolved for — see scan(). */
+let scannedAt = null
 
 /**
  * Reloading or updating the extension leaves the content scripts already
@@ -70,13 +82,18 @@ function send(message) {
   }
 }
 
+function stopTimer() {
+  clearTimeout(timer)
+  timer = null
+}
+
 /** Give up: stop watching, and undo everything we did to the page. */
 function teardown() {
   orphaned = true
   enabled = false
   observer?.disconnect()
   observer = null
-  clearTimeout(timer)
+  stopTimer()
   clearMarks()
   clearStyling()
 }
@@ -127,18 +144,25 @@ function applyStyling(stored) {
  *
  * Tagged even at full opacity: the root variable does the fading, so the setting
  * can change without every link having to be visited again.
+ *
+ * Any previous status comes off first: the link may be one the page has just
+ * pointed somewhere else, and the page it points at now may be unmarked.
  */
 function markLink(link, state) {
-  const status = STATUSES[state.status]
+  for (const status of MARKED) link.classList.remove(status.link)
+  const status = state && STATUSES[state.status]
   if (status) link.classList.add(status.link)
 }
 
-/** Links not looked at yet, ignoring anything that isn't a plain web link. */
+/**
+ * Links not looked up as they stand, ignoring anything that isn't a plain web
+ * link. A link whose href has changed since we resolved it counts as new.
+ */
 function candidates() {
   const out = []
   for (const link of document.links) {
-    if (link.hasAttribute(SEEN_ATTR)) continue
     if (!/^https?:$/i.test(link.protocol)) continue
+    if (checked.get(link) === link.href) continue
     out.push(link)
   }
   return out
@@ -146,6 +170,14 @@ function candidates() {
 
 async function scan() {
   if (!enabled) return
+  // A route change in a single-page app leaves everything on screen in place,
+  // including anchors now pointing at other pages, so once the URL moves every
+  // mark is suspect and the whole document is looked at again. The document
+  // never reloaded, which is the only reason this script is still here to ask.
+  if (location.href !== scannedAt) {
+    scannedAt = location.href
+    clearMarks()
+  }
   const links = candidates()
   if (!links.length) return
 
@@ -154,22 +186,33 @@ async function scan() {
     const states = await send({ type: 'checkLinks', urls: batch.map((link) => link.href) })
     if (!Array.isArray(states) || !enabled) return
     batch.forEach((link, i) => {
-      link.setAttribute(SEEN_ATTR, states[i]?.status || 'none')
-      if (states[i]) markLink(link, states[i])
+      // Recorded against the href we asked about, so a later swap re-qualifies.
+      checked.set(link, link.href)
+      markLink(link, states[i])
     })
   }
 }
 
+/**
+ * Throttled, not debounced: an app that mutates the DOM continuously — a live
+ * feed, a video's own controls — pushed a debounce's deadline back with every
+ * mutation and the scan never came. The first mutation of a burst books the
+ * scan and the rest ride along with it, so marks land within SCAN_DELAY_MS of
+ * the page changing however busy the page stays.
+ */
 function schedule() {
-  clearTimeout(timer)
-  timer = setTimeout(scan, DEBOUNCE_MS)
+  if (timer) return
+  timer = setTimeout(() => {
+    timer = null
+    scan()
+  }, SCAN_DELAY_MS)
 }
 
 function clearMarks() {
   for (const { link } of MARKED) {
     for (const el of document.querySelectorAll(`.${link}`)) el.classList.remove(link)
   }
-  for (const link of document.querySelectorAll(`[${SEEN_ATTR}]`)) link.removeAttribute(SEEN_ATTR)
+  checked = new WeakMap() // every link is a candidate again
 }
 
 /**
@@ -193,11 +236,19 @@ function setEnabled(next) {
     // Turning the marker on mid-session needs the current value too.
     chrome.storage.local.get(STYLE_KEYS).then(applyStyling, () => {})
     observer ??= new MutationObserver(schedule)
-    observer.observe(document.documentElement, { childList: true, subtree: true })
+    // `href` is watched as well as new nodes: a framework re-pointing a link it
+    // has already rendered changes nothing but that attribute, and that link
+    // now describes a different page.
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['href'],
+    })
     schedule()
   } else {
     observer?.disconnect()
-    clearTimeout(timer)
+    stopTimer()
     clearMarks()
     clearStyling()
   }

@@ -123,7 +123,7 @@ one turns it off — review and undo from anywhere, without a text box for typin
 slightly wrong.
 
 When on, it styles **every link pointing at a page you've marked**: unread links glow blue
-(the icon's unread blue), read links can be faded. Unmarked links are untouched. A debounced
+(the icon's unread blue), read links can be faded. Unmarked links are untouched. A throttled
 `MutationObserver` (300 ms, 400 links per lookup) catches links added later; any store change
 re-marks open pages immediately.
 
@@ -155,6 +155,24 @@ re-marks open pages immediately.
   below 100%, so at the default the rule matches nothing at all.
 - The setting was once `app:readLinkOpacity` holding a 0–1 fraction. The new name means a
   stale `0.5` can never be read as half a percent.
+
+**A page that never reloads is still a new page.** On a single-page app the content script
+outlives the route change, so the marker keeps up by watching the document rather than the
+load:
+
+- **Throttled, not debounced.** The first mutation of a burst books the scan and the rest ride
+  along with it. A debounce pushed its deadline back on every mutation, so on a page that
+  mutates without pause — a live feed, a video's own controls — the scan never arrived at all.
+- **`href` is watched as well as new nodes.** A framework routes by re-pointing anchors it has
+  already rendered, which changes nothing but that attribute.
+- **A link is "already looked at" only while it still points where it did.** What was checked
+  is kept in a `WeakMap` of link → the href it was resolved as, not a flag on the element, so a
+  recycled anchor is looked up again instead of keeping the mark of the page it used to point
+  at. Re-marking clears the old status first, since the page it points at now may be unmarked.
+- **When `location` moves, every mark is suspect**, so the next scan clears the page and
+  resolves it whole. The URL is compared inside the scan rather than hooked: history events
+  don't cover `pushState` from the page's own world, and a route change that renders anything
+  mutates the DOM anyway.
 
 **Read-only by construction.** The content script adds a class and nothing else; the worker
 accepts `checkLinks` and `siteAnnotate` and **no write messages at all**, so nothing running
