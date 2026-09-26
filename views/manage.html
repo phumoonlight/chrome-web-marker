@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Site Marker — all marked pages</title>
+    <link rel="stylesheet" href="../styles/ui.css" />
+  </head>
+  <body>
+    <div class="sheet sheet--wide">
+      <header class="page-head">
+        <div>
+          <h1>Site Marker</h1>
+          <p id="summary" class="lede">…</p>
+        </div>
+        <div class="page-actions">
+          <button id="export" class="btn" type="button">Export</button>
+          <button id="import" class="btn" type="button">Import…</button>
+        </div>
+      </header>
+
+      <!-- The import panel sits above the tabs on purpose: it's opened from the header,
+           and it belongs to neither the pages nor the settings. -->
+      <section id="import-panel" class="panel" hidden>
+        <div class="panel-head">
+          <h2>Import</h2>
+          <button id="import-close" class="link-btn" type="button">Close</button>
+        </div>
+        <div id="drop" class="drop" tabindex="0" role="button">
+          <div class="drop-main">Drop an export file here</div>
+          <div class="drop-sub">
+            or click to pick one — <code>.ndjson</code>, or an older <code>.json</code> export
+          </div>
+        </div>
+        <input
+          id="file"
+          type="file"
+          accept=".ndjson,.json,application/x-ndjson,application/json"
+          hidden
+        />
+        <div class="choice">
+          <label
+            ><input type="radio" name="mode" value="merge" checked /> Merge — newest wins</label
+          >
+          <label><input type="radio" name="mode" value="replace" /> Replace everything</label>
+        </div>
+        <p id="import-message" class="status" hidden></p>
+      </section>
+
+      <nav class="page-tabs" id="page-tabs" role="tablist">
+        <button
+          class="page-tab is-active"
+          data-tab="pages"
+          type="button"
+          role="tab"
+          aria-selected="true"
+        >
+          Saved pages <span id="tab-count" class="count">0</span>
+        </button>
+        <button class="page-tab" data-tab="settings" type="button" role="tab" aria-selected="false">
+          Settings
+        </button>
+      </nav>
+
+      <section id="tab-pages" class="tab-panel" role="tabpanel">
+        <div class="toolbar">
+          <div class="chips" id="chips">
+            <button class="chip is-active" data-filter="all" type="button">All</button>
+            <button class="chip" data-filter="unread" type="button">Unread</button>
+            <button class="chip" data-filter="read" type="button">Read</button>
+            <button class="chip" data-filter="favorite" type="button">★</button>
+          </div>
+          <input id="search" class="search" type="search" placeholder="Filter by title or URL" />
+        </div>
+
+        <div class="bulk">
+          <label class="switch bulk-all">
+            <input id="select-all" type="checkbox" />
+            <span id="bulk-count">Select all</span>
+          </label>
+          <div class="bulk-actions">
+            <button class="btn" type="button" data-bulk="unread" disabled>Unread</button>
+            <button class="btn" type="button" data-bulk="read" disabled>Read</button>
+            <button class="btn" type="button" data-bulk="favorite" disabled>★ Favorite</button>
+            <button class="btn" type="button" data-bulk="unfavorite" disabled>Unfavorite</button>
+            <button class="btn btn--danger" type="button" data-bulk="delete" disabled>
+              Delete
+            </button>
+          </div>
+        </div>
+
+        <div id="groups" class="groups"></div>
+        <p id="empty" class="empty" hidden></p>
+      </section>
+
+      <section id="tab-settings" class="tab-panel" role="tabpanel" hidden>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>On-page marker</h2>
+          </div>
+          <p class="panel-lede">
+            Links pointing at a page you've marked unread glow blue, and links to pages you've read
+            can be faded, so what stands out is what you haven't got to. Nothing is added to the
+            page, and it's display-only; marking is the popup's job. It's <strong>per site</strong>
+            and starts off everywhere: turn it on for the site you're on from that site's popup.
+            Tabs already open pick the change up without a reload.
+          </p>
+          <div id="annotated" class="chips chips--wrap"></div>
+          <p id="annotated-empty" class="panel-lede" hidden>Not on for any site yet.</p>
+
+          <p class="panel-lede">
+            The setting below is how marked links look wherever the marker is on, not where it shows
+            up.
+          </p>
+
+          <div class="field">
+            <label class="field-label" for="read-opacity">Read link opacity</label>
+            <input id="read-opacity" type="range" min="20" max="100" step="5" />
+            <output id="read-opacity-value" class="field-value" for="read-opacity"></output>
+          </div>
+          <p class="panel-lede">
+            How faded a link is when it points at a page you've marked read. Links to unread pages
+            fade half as far and keep their blue glow — at 40% here, they sit at 70%. At 100% the
+            page is left alone. Open tabs update as you drag.
+          </p>
+        </section>
+      </section>
+    </div>
+
+    <script type="module" src="../src/manage.js"></script>
+  </body>
+</html>

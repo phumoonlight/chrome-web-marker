@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Site Marker</title>
+    <link rel="stylesheet" href="../styles/ui.css" />
+  </head>
+  <body class="popup">
+    <header class="head">
+      <img id="favicon" class="favicon" alt="" />
+      <div class="head-text">
+        <div id="site" class="site">…</div>
+        <div id="scope" class="scope"></div>
+      </div>
+      <div class="head-actions">
+        <button id="annotate" class="ghost" type="button"></button>
+        <button
+          id="manage"
+          class="ghost"
+          type="button"
+          title="All marked pages, and import/export"
+          aria-label="All marked pages, and import/export"
+        ></button>
+      </div>
+    </header>
+
+    <section id="current" class="current" hidden>
+      <span id="current-dot" class="dot"></span>
+      <div class="current-text">
+        <div id="current-title" class="current-title"></div>
+        <div id="current-state" class="current-state"></div>
+      </div>
+      <div class="marks">
+        <button id="mark-toggle" class="ghost" type="button"></button>
+        <button id="mark-read" class="ghost" type="button" hidden></button>
+        <button id="mark-fav" class="ghost star" type="button"></button>
+        <button id="mark-remove" class="ghost" type="button" hidden></button>
+      </div>
+    </section>
+
+    <nav class="tabs" id="tabs">
+      <button
+        class="tab is-active"
+        data-view="unread"
+        data-icon="bookmark"
+        type="button"
+        title="Unread"
+        aria-label="Unread"
+      >
+        <span class="tab-glyph"></span>
+        <span class="count" id="count-unread">0</span>
+      </button>
+      <button
+        class="tab"
+        data-view="read"
+        data-icon="eye"
+        type="button"
+        title="Read"
+        aria-label="Read"
+      >
+        <span class="tab-glyph"></span>
+        <span class="count" id="count-read">0</span>
+      </button>
+      <button
+        class="tab tab--star"
+        data-view="favorite"
+        data-icon="star"
+        type="button"
+        title="Favorites"
+        aria-label="Favorites"
+      >
+        <span class="tab-glyph"></span>
+        <span class="count" id="count-favorite">0</span>
+      </button>
+    </nav>
+
+    <ul id="list" class="list"></ul>
+    <p id="empty" class="empty" hidden></p>
+
+    <script type="module" src="../src/popup.js"></script>
+  </body>
+</html>
