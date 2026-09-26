@@ -500,9 +500,11 @@ export function exportText(entries) {
 }
 
 /**
- * Validate an import file and return its entries. Three shapes are accepted:
+ * Validate an import file and return its entries. Four shapes are accepted:
  *
- *   - the current NDJSON export: a header line, then one entry per line
+ *   - a headed NDJSON export — a header line, then one entry per line — of any
+ *     version in SUPPORTED_VERSIONS: 4 is current, 3 carried favourite as a
+ *     status (entryIn turns those back into the flag), 2 already had the flag
  *   - **headerless NDJSON**: nothing but entry lines. This is what the shard
  *     files written by the old folder-sync feature look like, so those can be
  *     dragged straight in rather than being stranded
