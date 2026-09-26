@@ -10,7 +10,7 @@
    A `drop-shadow` rather than a colour filter: sepia/hue-rotate only rework the
    colour already there, so black or white link text would come out unchanged.
    The glow follows the shape of the text or image and takes no space. */
-.smk-unread-link {
+.wmk-unread-link {
   filter: drop-shadow(0 0 1.5px #2f6fed) drop-shadow(0 0 1px #2f6fed) !important;
 }
 
@@ -20,10 +20,10 @@
    default a true no-op: at 100% the rules do not match at all, so a site that
    fades its own visited links keeps doing exactly that. The variables are on the
    root too, so changing the setting restyles every marked link at once. */
-.smk-dim-read .smk-read-link {
-  opacity: var(--smk-read-opacity, 1) !important;
+.wmk-dim-read .wmk-read-link {
+  opacity: var(--wmk-read-opacity, 1) !important;
 }
 
-.smk-dim-unread .smk-unread-link {
-  opacity: var(--smk-unread-opacity, 1) !important;
+.wmk-dim-unread .wmk-unread-link {
+  opacity: var(--wmk-unread-opacity, 1) !important;
 }

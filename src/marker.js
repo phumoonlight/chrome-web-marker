@@ -1,4 +1,4 @@
-// The on-page half of Site Marker: links pointing at a page you have marked
+// The on-page half of Web Marker: links pointing at a page you have marked
 // unread glow blue, and links to pages you have already read can be faded, so
 // what stands out on a page is what you haven't got to yet. Nothing is added to
 // the page — no dot, no badge, only a class on links already there — and the
@@ -25,20 +25,20 @@ const READ_OPACITY_KEY = 'app:readOpacity'
  */
 const STATUSES = {
   read: {
-    link: 'smk-read-link',
-    variable: '--smk-read-opacity',
-    dim: 'smk-dim-read',
+    link: 'wmk-read-link',
+    variable: '--wmk-read-opacity',
+    dim: 'wmk-dim-read',
     fade: 1,
   },
   unread: {
-    link: 'smk-unread-link',
-    variable: '--smk-unread-opacity',
-    dim: 'smk-dim-unread',
+    link: 'wmk-unread-link',
+    variable: '--wmk-unread-opacity',
+    dim: 'wmk-dim-unread',
     fade: 0.5,
   },
 }
 const MARKED = Object.values(STATUSES)
-const SEEN_ATTR = 'data-smk'
+const SEEN_ATTR = 'data-wmk'
 const DEBOUNCE_MS = 300
 const CHUNK = 400
 

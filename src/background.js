@@ -96,10 +96,10 @@ async function paint(tabId, url, entry) {
     await chrome.action.setTitle({
       tabId,
       title: entry
-        ? `Site Marker — this page is ${[entry.status, entry.favorite && 'favorite']
+        ? `Web Marker — this page is ${[entry.status, entry.favorite && 'favorite']
             .filter(Boolean)
             .join(', ')}`
-        : 'Site Marker — this page is not marked',
+        : 'Web Marker — this page is not marked',
     })
   } catch {
     // Tab closed mid-update.

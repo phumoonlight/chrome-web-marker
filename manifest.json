@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Site Marker",
+  "name": "Web Marker",
   "version": "1.0.0",
   "description": "Mark any page unread, read or favorite. The toolbar icon shows the current page's state, and links to unread pages glow while read ones can be faded. Its own store, no bookmarks involved.",
   "permissions": ["storage", "unlimitedStorage", "tabs", "favicon"],
   "action": {
     "default_popup": "views/popup.html",
-    "default_title": "Site Marker"
+    "default_title": "Web Marker"
   },
   "background": {
     "service_worker": "src/background.js",

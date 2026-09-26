@@ -5,7 +5,7 @@ or **★ favorite** — see that state on the toolbar icon, and on the sites you
 for, links to unread pages glow blue and links to read pages can be faded. Marking is one
 click and always reversible.
 
-**Site Marker owns its own store.** Nothing needs to be bookmarked first, and the extension
+**Web Marker owns its own store.** Nothing needs to be bookmarked first, and the extension
 never reads or writes your browser bookmarks — it doesn't even ask for the permission.
 Everything it knows lives in the browser profile; **export and import** are how it moves.
 

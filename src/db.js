@@ -6,6 +6,11 @@
 // functions, never at import time, so common.js can import this module and
 // still load under node for its pure helpers.
 
+// Still the old name: the extension was called Site Marker when this database
+// was created, and an IndexedDB name is the address of the data. Renaming it
+// would open a new, empty database and strand every mark in the old one, which
+// is a lot of damage for a string nobody sees. New profiles inherit it too, so
+// there is one name rather than two.
 const DB_NAME = 'site-marker'
 // Version 1 of this database belonged to the removed folder-sync feature (a
 // directory-handle store). Opening at 2 upgrades any leftover copy: the

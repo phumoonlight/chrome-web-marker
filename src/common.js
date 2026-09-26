@@ -1,6 +1,6 @@
 // The store, plus the URL normalisation everything else agrees on.
 //
-// One entry per normalised page URL — Site Marker owns its data outright and
+// One entry per normalised page URL — Web Marker owns its data outright and
 // never reads or writes browser bookmarks. Entries live in IndexedDB (db.js);
 // settings stay in `chrome.storage.local`. Loaded as an ES module by the popup,
 // the manage page and the service worker; the content script talks to the worker
@@ -460,7 +460,11 @@ export function counts(list) {
   }
 }
 
-const EXPORT_FORMAT = 'site-marker'
+const EXPORT_FORMAT = 'web-marker'
+// What the header said while the extension was called Site Marker. Files written
+// then are otherwise identical, so they are read rather than rejected — the
+// rename was ours, and an export you already made shouldn't stop being yours.
+const LEGACY_FORMATS = ['site-marker']
 // 1 was one JSON object; 2 added NDJSON; 3 briefly made favourite a status; 4
 // put it back to a flag alongside the read state.
 const SUPPORTED_VERSIONS = [1, 2, 3, 4]
@@ -539,14 +543,14 @@ export function parseExport(text) {
   // A headed file may legitimately be empty; a headerless one that yielded
   // nothing is simply not ours.
   if (!headed && !entries.length) {
-    throw new Error('Not a Site Marker file — there are no marked pages in it.')
+    throw new Error('Not a Web Marker file — there are no marked pages in it.')
   }
   return entries
 }
 
 function checkHeader(header) {
-  if (header?.format !== EXPORT_FORMAT) {
-    throw new Error('Not a Site Marker export file — the first line must be its header.')
+  if (header?.format !== EXPORT_FORMAT && !LEGACY_FORMATS.includes(header?.format)) {
+    throw new Error('Not a Web Marker export file — the first line must be its header.')
   }
   if (!SUPPORTED_VERSIONS.includes(header.version)) {
     throw new Error(

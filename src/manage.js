@@ -356,7 +356,7 @@ el.export.addEventListener('click', () => {
   const href = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = href
-  link.download = `site-marker-${new Date().toISOString().slice(0, 10)}.ndjson`
+  link.download = `web-marker-${new Date().toISOString().slice(0, 10)}.ndjson`
   link.click()
   setTimeout(() => URL.revokeObjectURL(href), 10_000)
 })

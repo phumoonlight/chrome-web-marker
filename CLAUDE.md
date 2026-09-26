@@ -1,4 +1,4 @@
-# Site Marker — how it works
+# Web Marker — how it works
 
 The design and the rules the code keeps. [`README.md`](README.md) is the pitch. Read this
 before changing anything.
@@ -96,10 +96,12 @@ approximate, the only size IndexedDB admits to). The popup reads only the curren
 through the `domain`/`host` index (`getSiteEntries()`), so growth doesn't slow it down; only
 the manage page loads everything, which is its job.
 
-The database name is inherited: the removed folder-sync feature used a `site-marker`
-database too, so `db.js` deletes whatever stores it finds when upgrading to its own schema
-(v2). The old `chrome.storage.local` → IndexedDB migration is gone; a profile that never ran
-a build with it just starts empty.
+**The database is still called `site-marker`**, from when the extension was. An IndexedDB
+name is the address of the data: renaming it opens a new, empty database and strands every
+mark in the old one, so it stays. Same story twice over — the removed folder-sync feature
+used a `site-marker` database too, so `db.js` deletes whatever stores it finds when upgrading
+to its own schema (v2). The old `chrome.storage.local` → IndexedDB migration is gone; a
+profile that never ran a build with it just starts empty.
 
 ## The on-page marker
 
@@ -144,10 +146,10 @@ re-marks open pages immediately.
   holds each status's class, CSS variable and gate.
 - Both opacities are **custom properties on the page root**, so dragging the slider restyles
   every marked link in every open tab at once — no rescan, nothing in the DOM retouched.
-  Links are tagged `.smk-read-link` / `.smk-unread-link` whatever the setting says.
+  Links are tagged `.wmk-read-link` / `.wmk-unread-link` whatever the setting says.
 - **`!important` throughout**: a site's own link rule beats a single class of ours easily,
   and without it the marker would silently do nothing on most pages. Each opacity is
-  additionally gated behind a root class (`.smk-dim-read` / `.smk-dim-unread`) added only
+  additionally gated behind a root class (`.wmk-dim-read` / `.wmk-dim-unread`) added only
   below 100%, so at the default the rule matches nothing at all.
 - The setting was once `app:readLinkOpacity` holding a 0–1 fraction. The new name means a
   stale `0.5` can never be read as half a percent.
@@ -184,12 +186,12 @@ However many rows, a bulk change is **one read and one write** (`updateEntries`)
 
 ## Export format
 
-**Export** downloads the whole store as `site-marker-<YYYY-MM-DD>.ndjson`
+**Export** downloads the whole store as `web-marker-<YYYY-MM-DD>.ndjson`
 ([NDJSON](https://github.com/ndjson/ndjson-spec)): a header line, then one line per entry in
 URL-key order.
 
 ```
-{"format":"site-marker","version":4,"exportedAt":"2026-08-12T09:12:33.401Z","counts":{"sites":12,"total":84,"unread":30,"read":54,"favorite":9}}
+{"format":"web-marker","version":4,"exportedAt":"2026-08-12T09:12:33.401Z","counts":{"sites":12,"total":84,"unread":30,"read":54,"favorite":9}}
 {"url":"https://example.com/article","title":"Some article","status":"unread","favorite":true,"addedAt":"2026-05-02T18:20:00.000Z","updatedAt":"2026-06-11T07:03:12.000Z"}
 {"url":"https://example.com/other","title":"Another","status":"read","addedAt":"2026-05-04T10:00:00.000Z","updatedAt":"2026-05-09T21:14:02.000Z"}
 ```
@@ -211,6 +213,10 @@ choice. Accepted shapes:
 | v2 | already had the flag; survives whole |
 | v1 | one JSON object with an `entries` array |
 | headerless NDJSON | entry lines only — the per-site shards the short-lived folder-sync wrote, so they aren't stranded |
+
+A header saying `"format":"site-marker"` is also read: that's what exports written before the
+rename carry, and they're otherwise identical files (`LEGACY_FORMATS` in `common.js`). The
+rename was ours to make, so it isn't an export's problem.
 
 Another tool's export is **not** accepted, however close it looks — `parseExport()` throws a
 readable message instead. Quietly guessing at someone else's shape is how you import
